@@ -2,12 +2,22 @@
 
 # hallucination-detector
 
-Detect hallucinations in LLM outputs. Claim-level extraction, evidence retrieval, NLI scoring.
+Claim-level hallucination detection for LLM outputs.
+
+The pipeline extracts verifiable claims, retrieves supporting or contradicting evidence, scores each claim with an NLI model, and aggregates the results into a final hallucination score.
+
+## Status
+
+Research prototype. The core pipeline, tests, CI, and FastAPI server are implemented. PyPI publishing and larger public benchmarks are not done yet.
 
 ## Install
 
+This package is not published to PyPI yet.
+
 ```bash
-pip install hallucination-detector
+git clone https://github.com/JKDasondee/hallucination-detector.git
+cd hallucination-detector
+pip install -e ".[all]"
 ```
 
 ## Quick Start
@@ -20,27 +30,22 @@ result = detect(
     context="The Great Wall of China is not visible from space with the naked eye"
 )
 
-print(result.score)        # 0.87 — high hallucination probability
-print(result.claims[0])    # Claim(text="Great Wall visible from space", label="hallucinated", ...)
+print(result.score)
+print(result.claims[0])
 ```
 
-Without context (uses built-in knowledge retrieval):
-
-```python
-result = detect("Albert Einstein invented the telephone")
-```
+Without explicit context, the retriever tries to gather supporting evidence before scoring the claims.
 
 ## How It Works
 
-1. **Claim Extraction** — Break LLM response into atomic verifiable claims (spaCy NER + rules)
-2. **Evidence Retrieval** — Find supporting/contradicting evidence (ChromaDB + sentence-transformers)
-3. **NLI Scoring** — Score each claim against evidence (cross-encoder entailment model)
-4. **Aggregation** — Combine scores into final hallucination probability (sklearn ensemble)
+1. Claim extraction with spaCy + rules
+2. Evidence retrieval with dense similarity search
+3. Claim scoring with a cross-encoder NLI model
+4. Aggregation into a final hallucination probability
 
-## As an API Server
+## Run As An API Server
 
 ```bash
-pip install hallucination-detector[server]
 hallucination-detector serve --port 8000
 ```
 
@@ -50,59 +55,61 @@ curl -X POST http://localhost:8000/detect \
   -d '{"text": "Einstein invented the telephone"}'
 ```
 
-## Pipeline Architecture
+## Pipeline
 
-```
-Input Text -> Claim Extractor -> Evidence Retriever -> NLI Scorer -> Aggregator -> Result
-                  |                    |                 |              |
-             spaCy NER          ChromaDB/FAISS    cross-encoder    sklearn
-             + rules         + sentence-transformers   (NLI)     ensemble
+```text
+Input text
+  -> claim extraction
+  -> evidence retrieval
+  -> NLI scoring
+  -> aggregation
+  -> final detection result
 ```
 
 ## Optional Dependencies
 
 ```bash
-pip install hallucination-detector[ml]         # spaCy, sentence-transformers, torch, sklearn
-pip install hallucination-detector[retrieval]   # ChromaDB, FAISS
-pip install hallucination-detector[server]      # FastAPI, uvicorn, anthropic
-pip install hallucination-detector[all]         # everything
+pip install -e ".[ml]"
+pip install -e ".[retrieval]"
+pip install -e ".[server]"
+pip install -e ".[all]"
 ```
 
 ## Development
 
 ```bash
-git clone https://github.com/jaydasondee/hallucination-detector.git
-cd hallucination-detector
-pip install -e ".[dev]"
 pytest
-ruff check src/ tests/
+ruff check src tests
+mypy src
 ```
 
-## Benchmarks
+## Benchmark
 
-Run with `python benchmarks/evaluate.py` against the labeled `benchmarks/dataset.json` (30 hand-curated claim/context pairs, 16 hallucinated / 14 verified):
+Run with `python benchmarks/evaluate.py` against `benchmarks/dataset.json`.
 
-| Metric    | Value   |
-|-----------|---------|
-| Accuracy  | 96.7%   |
-| Precision | 100.0%  |
-| Recall    | 93.8%   |
-| F1 Score  | 96.8%   |
+Current sanity-set results on 30 hand-curated claim/context pairs:
+
+| Metric    | Value |
+|-----------|-------|
+| Accuracy  | 96.7% |
+| Precision | 100.0% |
+| Recall    | 93.8% |
+| F1 Score  | 96.8% |
 | Latency   | 0.94s / claim |
 
-Larger benchmarks (TruthfulQA, HaluEval, FEVER) are in progress.
+This is a smoke-test benchmark, not a definitive public leaderboard result. Larger evaluations on TruthfulQA, HaluEval, and FEVER are still pending.
 
-## Status
+## Components
 
-| Component | Status | Model |
+| Component | Status | Notes |
 |-----------|--------|-------|
-| Claim extraction | Working | spaCy `en_core_web_sm` NER + sentence segmentation |
-| Evidence retrieval | Working | `all-MiniLM-L6-v2` dense cosine similarity |
-| NLI scoring | Working | `cross-encoder/nli-deberta-v3-base` |
-| Aggregation | Working | Weighted mean |
+| Claim extraction | Working | spaCy + sentence segmentation + rules |
+| Evidence retrieval | Working | dense retrieval |
+| NLI scoring | Working | cross-encoder entailment model |
+| Aggregation | Working | weighted score aggregation |
 | API server | Working | FastAPI |
-| PyPI package | Planned | |
-| Benchmarks | In progress | TruthfulQA, HaluEval |
+| PyPI release | Planned | not published yet |
+| Large benchmarks | In progress | TruthfulQA, HaluEval, FEVER |
 
 ## License
 
