@@ -34,3 +34,5 @@ Thumbs.db
 .idea/
 .vscode/
 *.iml
+nul
+update_resume.py
