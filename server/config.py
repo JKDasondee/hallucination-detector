@@ -1,11 +1,11 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings
 
-_root = Path(__file__).resolve().parent.parent.parent
+_root = Path(__file__).resolve().parent.parent
 
 
 class Cfg(BaseSettings):
-    anthropic_api_key: str
+    anthropic_api_key: str = ""
     model: str = "claude-sonnet-4-20250514"
     max_tokens: int = 4096
 
