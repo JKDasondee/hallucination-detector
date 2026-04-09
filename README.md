@@ -80,7 +80,17 @@ ruff check src/ tests/
 
 ## Benchmarks
 
-Evaluation against RAGAS, Vectara HHEM, SelfCheckGPT on standard datasets in progress.
+Run with `python benchmarks/evaluate.py` against the labeled `benchmarks/dataset.json` (30 hand-curated claim/context pairs, 16 hallucinated / 14 verified):
+
+| Metric    | Value   |
+|-----------|---------|
+| Accuracy  | 96.7%   |
+| Precision | 100.0%  |
+| Recall    | 93.8%   |
+| F1 Score  | 96.8%   |
+| Latency   | 0.94s / claim |
+
+Larger benchmarks (TruthfulQA, HaluEval, FEVER) are in progress.
 
 ## Status
 
