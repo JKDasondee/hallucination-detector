@@ -78,20 +78,19 @@ ruff check src/ tests/
 
 ## Benchmarks
 
-Coming soon — evaluation against RAGAS, Vectara HHEM, SelfCheckGPT on standard datasets.
+Evaluation against RAGAS, Vectara HHEM, SelfCheckGPT on standard datasets in progress.
 
 ## Status
 
-Active development. Core pipeline shipping week of Apr 14.
-
-| Component | Status |
-|-----------|--------|
-| Claim extraction | In progress |
-| Evidence retrieval | Planned |
-| NLI scoring | Planned |
-| Aggregation | Planned |
-| API server | Working |
-| PyPI package | Planned |
+| Component | Status | Model |
+|-----------|--------|-------|
+| Claim extraction | Working | spaCy `en_core_web_sm` NER + sentence segmentation |
+| Evidence retrieval | Working | `all-MiniLM-L6-v2` dense cosine similarity |
+| NLI scoring | Working | `cross-encoder/nli-deberta-v3-base` |
+| Aggregation | Working | Weighted mean |
+| API server | Working | FastAPI |
+| PyPI package | Planned | |
+| Benchmarks | In progress | TruthfulQA, HaluEval |
 
 ## License
 

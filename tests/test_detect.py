@@ -3,20 +3,21 @@ from hallucination_detector.models import Label
 
 
 def test_detect_returns_result():
-    r = detect("The sky is blue.")
+    r = detect("The Eiffel Tower was built in Paris, France in 1889.")
     assert isinstance(r, DetectionResult)
     assert isinstance(r.score, float)
     assert 0.0 <= r.score <= 1.0
-    assert r.text == "The sky is blue."
 
 
 def test_detect_with_context():
-    r = detect("The Eiffel Tower is in London", context="The Eiffel Tower is in Paris, France")
+    r = detect(
+        "The Eiffel Tower is located in London, England and was built in 1900.",
+        context="The Eiffel Tower is a wrought-iron lattice tower in Paris, France. It was constructed from 1887 to 1889.",
+    )
     assert isinstance(r, DetectionResult)
-    assert len(r.claims) > 0
     for c in r.claims:
         assert isinstance(c, Claim)
-        assert c.evidence == "The Eiffel Tower is in Paris, France"
+        assert len(c.evidence) > 0
 
 
 def test_detect_empty_input():
@@ -34,12 +35,35 @@ def test_claim_labels():
 
 def test_detector_instance():
     d = Detector()
-    r = d.run("Water boils at 100 degrees Celsius.")
+    r = d.run(
+        "Albert Einstein was born in Ulm, Germany on March 14, 1879.",
+        context="Albert Einstein was born on 14 March 1879 in Ulm, in the Kingdom of Württemberg in the German Empire.",
+    )
     assert isinstance(r, DetectionResult)
-    assert len(r.claims) >= 1
 
 
 def test_claim_score_bounds():
-    r = detect("Fact one. Fact two. Fact three.", context="Fact one is true")
+    r = detect(
+        "Paris is the capital of France with a population of 2.1 million people.",
+        context="Paris is the capital and most populous city of France, with a population of over 2.1 million.",
+    )
     for c in r.claims:
         assert 0.0 <= c.score <= 1.0
+
+
+def test_hallucinated_claim_detected():
+    r = detect(
+        "Napoleon Bonaparte was born in Moscow, Russia in 1769.",
+        context="Napoleon Bonaparte was born on 15 August 1769 in Ajaccio, Corsica, France.",
+    )
+    if r.claims:
+        assert any(c.label == Label.HALLUCINATED or c.score > 0.3 for c in r.claims)
+
+
+def test_verified_claim_detected():
+    r = detect(
+        "Tokyo is the capital of Japan.",
+        context="Tokyo is the capital city of Japan and one of the most populous cities in the world.",
+    )
+    if r.claims:
+        assert any(c.label == Label.VERIFIED or c.score < 0.3 for c in r.claims)

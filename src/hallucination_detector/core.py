@@ -11,10 +11,7 @@ class Detector:
 
     def run(self, text: str, context: str | None = None) -> DetectionResult:
         claims = extract_claims(text)
-        if context:
-            claims = [c.model_copy(update={"evidence": context}) for c in claims]
-        else:
-            claims = retrieve_evidence(claims)
+        claims = retrieve_evidence(claims, context=context)
         claims = score_claims(claims)
         sc = aggregate(claims)
         return DetectionResult(text=text, claims=claims, score=sc)
