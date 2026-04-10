@@ -1,5 +1,4 @@
 import re
-from functools import lru_cache
 
 import spacy
 
@@ -7,7 +6,25 @@ from hallucination_detector.models import Claim
 
 _nlp = None
 _OPINION = re.compile(r"^(i think|i believe|i feel|maybe|perhaps|probably|in my opinion|imo)\b", re.I)
-_VERIFIABLE_ENTS = {"PERSON", "ORG", "GPE", "LOC", "DATE", "TIME", "MONEY", "QUANTITY", "ORDINAL", "CARDINAL", "EVENT", "FAC", "PRODUCT", "WORK_OF_ART", "LAW", "NORP", "PERCENT"}
+_VERIFIABLE_ENTS = {
+    "PERSON",
+    "ORG",
+    "GPE",
+    "LOC",
+    "DATE",
+    "TIME",
+    "MONEY",
+    "QUANTITY",
+    "ORDINAL",
+    "CARDINAL",
+    "EVENT",
+    "FAC",
+    "PRODUCT",
+    "WORK_OF_ART",
+    "LAW",
+    "NORP",
+    "PERCENT",
+}
 _NUM = re.compile(r"\d")
 
 
@@ -30,7 +47,7 @@ def extract_claims(text: str) -> list[Claim]:
             continue
         if _OPINION.match(t):
             continue
-        span = doc[s.start:s.end]
+        span = doc[s.start : s.end]
         has_ent = any(e.label_ in _VERIFIABLE_ENTS for e in span.ents)
         has_num = bool(_NUM.search(t))
         if has_ent or has_num:

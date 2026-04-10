@@ -12,7 +12,10 @@ def test_detect_returns_result():
 def test_detect_with_context():
     r = detect(
         "The Eiffel Tower is located in London, England and was built in 1900.",
-        context="The Eiffel Tower is a wrought-iron lattice tower in Paris, France. It was constructed from 1887 to 1889.",
+        context=(
+            "The Eiffel Tower is a wrought-iron lattice tower in Paris, France."
+            " It was constructed from 1887 to 1889."
+        ),
     )
     assert isinstance(r, DetectionResult)
     for c in r.claims:

@@ -11,12 +11,13 @@ def _get_model():
     global _model
     if _model is None:
         from sentence_transformers import SentenceTransformer
+
         _model = SentenceTransformer("all-MiniLM-L6-v2")
     return _model
 
 
 def _split_sentences(txt: str) -> list[str]:
-    parts = re.split(r'(?<=[.!?])\s+', txt.strip())
+    parts = re.split(r"(?<=[.!?])\s+", txt.strip())
     return [p for p in parts if len(p) > 5]
 
 
