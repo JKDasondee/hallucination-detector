@@ -70,3 +70,32 @@ def test_verified_claim_detected():
     )
     if r.claims:
         assert any(c.label == Label.VERIFIED or c.score < 0.3 for c in r.claims)
+
+
+def test_detect_with_samples_selfcheck():
+    r = detect(
+        "Paris is the capital of France.",
+        samples=[
+            "Paris is the capital of France.",
+            "France's capital city is Paris.",
+            "The capital of France is Paris.",
+        ],
+    )
+    assert isinstance(r, DetectionResult)
+    assert 0.0 <= r.score <= 1.0
+
+
+def test_selfcheck_nli_function():
+    from hallucination_detector import selfcheck_nli
+
+    score = selfcheck_nli(
+        "The moon is made of cheese.",
+        ["The moon is a rocky body.", "The moon is not made of cheese."],
+    )
+    assert isinstance(score, float)
+    assert 0.0 <= score <= 1.0
+
+
+def test_detect_no_context_no_samples():
+    r = detect("Random text without context.")
+    assert isinstance(r, DetectionResult)
