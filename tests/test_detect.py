@@ -96,6 +96,29 @@ def test_selfcheck_nli_function():
     assert 0.0 <= score <= 1.0
 
 
+def test_coverage_score():
+    from hallucination_detector import coverage_score, omission_risk
+
+    resp = "Paris is the capital of France."
+    evidence = [
+        "Paris is the capital of France.",
+        "France is in Europe.",
+        "The Eiffel Tower is in Paris.",
+    ]
+    cov = coverage_score(resp, evidence)
+    assert isinstance(cov, float)
+    assert 0.0 <= cov <= 1.0
+    omit = omission_risk(resp, evidence)
+    assert abs(cov + omit - 1.0) < 1e-6
+
+
+def test_coverage_empty_inputs():
+    from hallucination_detector import coverage_score
+
+    assert coverage_score("text", []) == 0.0
+    assert coverage_score("", ["evidence"]) == 0.0
+
+
 def test_detect_no_context_no_samples():
     r = detect("Random text without context.")
     assert isinstance(r, DetectionResult)
