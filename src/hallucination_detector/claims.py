@@ -1,10 +1,11 @@
 import re
+from typing import Any
 
 import spacy
 
 from hallucination_detector.models import Claim
 
-_nlp = None
+_nlp: Any = None
 _OPINION = re.compile(r"^(i think|i believe|i feel|maybe|perhaps|probably|in my opinion|imo)\b", re.I)
 _VERIFIABLE_ENTS = {
     "PERSON",
@@ -28,7 +29,7 @@ _VERIFIABLE_ENTS = {
 _NUM = re.compile(r"\d")
 
 
-def _load():
+def _load() -> Any:
     global _nlp
     if _nlp is None:
         _nlp = spacy.load("en_core_web_sm")

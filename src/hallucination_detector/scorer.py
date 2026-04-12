@@ -20,7 +20,7 @@ def score_claims(claims: list[Claim]) -> list[Claim]:
         if not c.evidence:
             out.append(c.model_copy(update={"score": 0.5, "label": Label.UNCERTAIN}))
             continue
-        logits = m.predict([(c.text, c.evidence)])
+        logits = np.asarray(m.predict([(c.text, c.evidence)]))
         probs = _softmax(logits[0])
         cont, _, ent = probs[0], probs[1], probs[2]
         if ent > 0.7:
@@ -35,4 +35,5 @@ def score_claims(claims: list[Claim]) -> list[Claim]:
 
 def _softmax(x: np.ndarray) -> np.ndarray:
     e = np.exp(x - np.max(x))
-    return e / e.sum()
+    result: np.ndarray = e / e.sum()
+    return result

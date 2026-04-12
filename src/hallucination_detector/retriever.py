@@ -1,13 +1,14 @@
 import re
+from typing import Any
 
 import numpy as np
 
 from hallucination_detector.models import Claim
 
-_model = None
+_model: Any = None
 
 
-def _get_model():
+def _get_model() -> Any:
     global _model
     if _model is None:
         from sentence_transformers import SentenceTransformer
@@ -24,7 +25,8 @@ def _split_sentences(txt: str) -> list[str]:
 def _cosine_sim(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     n = np.linalg.norm(a) * np.linalg.norm(b, axis=1)
     n = np.where(n == 0, 1e-10, n)
-    return (a @ b.T) / n
+    result: np.ndarray = (a @ b.T) / n
+    return result
 
 
 def retrieve_evidence(claims: list[Claim], context: str | None = None, k: int = 3) -> list[Claim]:
